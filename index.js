@@ -31,11 +31,27 @@ app.get('/api/:date?', (req, res) => {
     });
   }
 
-  // Try to parse the date parameter
-  const date = new Date(dateParam);
+  // Try to parse the date parameter as a number (unix timestamp)
+  const unixTimestamp = parseInt(dateParam);
+  if (!isNaN(unixTimestamp)) {
+    const date = new Date(unixTimestamp);
+    return res.json({
+      unix: unixTimestamp,
+      utc: date.toUTCString(),
+    });
+  }
 
-  // If the date is invalid, return an error object
+  // If the date parameter is not a number, try to parse it as a date string
+  const date = new Date(dateParam);
   if (isNaN(date.getTime())) {
+    return res.json({ error: 'Invalid Date' });
+  }
+
+  return res.json({
+    unix: date.getTime(),
+    utc: date.toUTCString(),
+  });
+});
     return res.json({ error: 'Invalid Date' });
   }
 
